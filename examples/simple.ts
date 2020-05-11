@@ -1,6 +1,6 @@
 import { CancellationToken, CancellationTokenSource, sleep } from "../src";
 
-async function forever(token = CancellationToken): Promise<never> {
+async function forever(token: CancellationToken): Promise<never> {
   for (;;) {
     await sleep(1000, token);
     console.log("another second has passed");

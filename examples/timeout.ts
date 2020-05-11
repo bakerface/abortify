@@ -1,11 +1,11 @@
 import { CancellationToken, CancellationTokenSource, sleep } from "../src";
 
-async function work(ms: number, token = CancellationToken): Promise<number> {
+async function work(ms: number, token: CancellationToken): Promise<number> {
   await sleep(ms, token);
   return 42;
 }
 
-async function timeout(ms: number, token = CancellationToken): Promise<never> {
+async function timeout(ms: number, token: CancellationToken): Promise<never> {
   await sleep(ms, token);
   throw new Error(`The operation timed out after ${ms}ms`);
 }

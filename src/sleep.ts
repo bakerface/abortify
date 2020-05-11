@@ -1,15 +1,19 @@
-import { CancellationToken } from "./cancellation-token";
+import { abortify, Abortable, Abort } from "./abortify";
 
-export function sleep(ms: number, token = CancellationToken): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const handle = setTimeout(() => {
-      unsubscribe(); // eslint-disable-line @typescript-eslint/no-use-before-define
-      resolve();
-    }, ms);
+const wait = (ms: number): Abortable<void> => (resolve, reject): Abort => {
+  const handle = setTimeout(resolve, ms);
 
-    const unsubscribe = token.subscribe((err) => {
-      clearTimeout(handle);
-      reject(err);
-    });
-  });
-}
+  return (err): void => {
+    clearTimeout(handle);
+    reject(err);
+  };
+};
+
+/**
+ * Sleeps for the specified duration (in milliseconds).
+ *
+ * @param {number} ms - The number of milliseconds.
+ * @param {import("./cancellation-token").CancellationToken} token - The cancellation token.
+ * @returns {Promise<void>}
+ */
+export const sleep = abortify(wait);

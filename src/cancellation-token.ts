@@ -1,4 +1,6 @@
-import type { CancellationTokenContract } from "./cancellation-token-contract";
-import { CancellationTokenSource } from "./cancellation-token-source";
+export type CancellationListener = (err: Error) => void;
+export type Unsubscribe = () => void;
 
-export const CancellationToken: CancellationTokenContract = new CancellationTokenSource();
+export interface CancellationToken {
+  subscribe(fn: CancellationListener): Unsubscribe;
+}

@@ -1,7 +1,30 @@
 # abortify
 **A cancellation token implementation in typescript**
 
-## A quick example
+## Abortables
+An abortable is a function that accepts a resolve and reject function (the same
+as the Promise constructor) and returns a function for aborting the operation.
+The abortify function converts abortables to abortable async functions using
+cancellation tokens. Consider a sample `sleep` implementation below.
+
+``` typescript
+import { abortify, Abortable, Abort } from "abortify";
+
+// this function creates an abortable that waits for `ms` milliseconds
+const wait = (ms: number): Abortable<void> => (resolve, reject): Abort => {
+  const handle = setTimeout(resolve, ms);
+
+  return (err): void => {
+    clearTimeout(handle);
+    reject(err);
+  };
+};
+
+// convert the wait function above to an async function
+export const sleep = abortify(wait);
+```
+
+## Using the abortified functions
 
 ``` typescript
 import { CancellationToken, CancellationTokenSource, sleep } from "abortify";
@@ -32,30 +55,4 @@ async function main(): Promise<void> {
 }
 
 main();
-```
-
-## The CancellationToken contract
-A CancellationToken exposes a function allowing the caller to subscribe to
-future cancellations. If subscribing to a cancellation token that has already
-been cancelled, the callback will be called after the event loop is unwound.
-This guarantees that `unsubscribe` will be assigned before the callback is
-invoked. Subscribers are automatically unsubscribed when the callback is
-called. Consider a sample `sleep` implementation below.
-
-``` typescript
-import { CancellationToken } from "abortify";
-
-export function sleep(ms: number, token = CancellationToken): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const handle = setTimeout(() => {
-      unsubscribe();
-      resolve();
-    }, ms);
-
-    const unsubscribe = token.subscribe((err) => {
-      clearTimeout(handle);
-      reject(err);
-    });
-  });
-}
 ```

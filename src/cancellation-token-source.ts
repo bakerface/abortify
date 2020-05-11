@@ -1,10 +1,10 @@
 import type {
-  CancellationTokenContract,
+  CancellationToken,
   CancellationListener,
   Unsubscribe,
-} from "./cancellation-token-contract";
+} from "./cancellation-token";
 
-export class CancellationTokenSource implements CancellationTokenContract {
+export class CancellationTokenSource implements CancellationToken {
   private _err: Error | undefined;
   private _fns: CancellationListener[];
 
