@@ -27,6 +27,12 @@
   "bugs": {
     "url": "https://github.com/bakerface/abortify/issues"
   },
+  "files": [
+    "README.md",
+    "dist/index.d.ts",
+    "dist/index.es.js",
+    "dist/index.js"
+  ],
   "scripts": {
     "build": "rollup -c",
     "dist": "git add -A dist",
