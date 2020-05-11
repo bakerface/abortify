@@ -2,6 +2,29 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+function abortify(factory) {
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var token = args.pop();
+        return new Promise(function (resolve, reject) {
+            var abortable = factory.apply(void 0, args);
+            var unsubscribe = function () {
+                reject(new Error("Resolve or reject called synchronously"));
+            };
+            unsubscribe = token.subscribe(abortable(function (val) {
+                unsubscribe();
+                resolve(val);
+            }, function (err) {
+                unsubscribe();
+                reject(err);
+            }));
+        });
+    };
+}
+
 var CancellationTokenSource = /** @class */ (function () {
     function CancellationTokenSource() {
         this._fns = [];
@@ -29,22 +52,22 @@ var CancellationTokenSource = /** @class */ (function () {
     return CancellationTokenSource;
 }());
 
-var CancellationToken = new CancellationTokenSource();
+var wait = function (ms) { return function (resolve, reject) {
+    var handle = setTimeout(resolve, ms);
+    return function (err) {
+        clearTimeout(handle);
+        reject(err);
+    };
+}; };
+/**
+ * Sleeps for the specified duration (in milliseconds).
+ *
+ * @param {number} ms - The number of milliseconds.
+ * @param {import("./cancellation-token").CancellationToken} token - The cancellation token.
+ * @returns {Promise<void>}
+ */
+var sleep = abortify(wait);
 
-function sleep(ms, token) {
-    if (token === void 0) { token = CancellationToken; }
-    return new Promise(function (resolve, reject) {
-        var handle = setTimeout(function () {
-            unsubscribe(); // eslint-disable-line @typescript-eslint/no-use-before-define
-            resolve();
-        }, ms);
-        var unsubscribe = token.subscribe(function (err) {
-            clearTimeout(handle);
-            reject(err);
-        });
-    });
-}
-
-exports.CancellationToken = CancellationToken;
 exports.CancellationTokenSource = CancellationTokenSource;
+exports.abortify = abortify;
 exports.sleep = sleep;
