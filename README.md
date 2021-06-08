@@ -1,24 +1,17 @@
 # abortify
 **Create abortable async functions with ease**
 
-## Abortables
-An abortable is a function that accepts a resolve and reject function (the same
-as the Promise constructor) and returns a function for aborting the operation.
-The abortify function converts works similar to `util.promisify` in that it
-converts the abortable to a function that returns a promise. In addition,
-abortify adds an optional argument allowing the user to pass an `AbortSignal`
-to cancel the promise.
+## Abortable
 
-Below is an example of an abortified sleep function (also provided by this
-package to fulfill a common use case).
+An **abortable** is an asynchronous function that can be aborted. An abortable
+is passed a `resolve` and `reject` callback, just like the `Promise`
+constructor, and returns a function for aborting the operation. Consider the
+following definition of an abortable version of `setTimeout`:
 
 ``` typescript
-import { Abortable, abortify } from "abortify";
+import type { Abortable } from "abortify";
 
-// typeof sleep == (ms: number, signal?: AbortSignal) => Promise<void>
-export const sleep = abortify(createAbortableSleep);
-
-function createAbortableSleep(ms: number): Abortable<void> {
+export function setAbortableTimeout(ms: number): Abortable<void> {
   return (resolve, reject) => {
     const handle = setTimeout(resolve, ms);
     return () => clearTimeout(handle);
@@ -26,12 +19,38 @@ function createAbortableSleep(ms: number): Abortable<void> {
 }
 ```
 
-Once you have abort
+## abortify
+
+The `abortify` function converts abortable functions into functions that return
+a `Promise`. It works just like `util.promisify`, with a few additions:
+
+- The function will accept an `AbortSignal` as an optional final argument.
+- The function will throw an `AbortError` when the signal is aborted.
+- The abortable will be aborted before the promise resolves or rejects.
+
+Consider the following definition of an abortified version of the
+`setAbortableTimeout` above:
+
+``` typescript
+import { abortify } from "abortify";
+
+export const sleep = abortify(setAbortableTimeout);
+
+// The sleep function above has the following signature:
+// (ms: number, signal?: AbortSignal) => Promise<void>
+```
+
+## Using abortified functions
+
+Once you have abortified a function you use it just like any other async
+function. Consider the following example:
 
 ``` typescript
 import { sleep } from "abortify";
 
-async function forever(signal: AbortSignal) {
+// this function will print a message every second
+// this function will only exit when the signal is aborted
+async function forever(signal?: AbortSignal) {
   for (;;) {
     await sleep(1000, signal);
     console.log("another second has passed");
@@ -47,7 +66,9 @@ async function main() {
   try {
     await forever(controller.signal);
   } catch (err) {
-    console.error(err); // AbortError: The user aborted the request
+    if (err.aborted) {
+      console.error(err); // AbortError: The operation was aborted
+    }
   }
 }
 
