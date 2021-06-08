@@ -2,7 +2,6 @@
   "extends": [
     "prettier",
     "plugin:prettier/recommended",
-    "prettier/@typescript-eslint",
     "plugin:@typescript-eslint/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
@@ -13,11 +12,37 @@
     "prettier",
     "@typescript-eslint"
   ],
+  "ignorePatterns": ["dist/*.js", "dist/*.mjs", "dist/*.d.ts"],
   "rules": {
     "indent": [0],
-    "import/order": [1, {"alphabetize": {"order":"asc", "caseInsensitive": false}}],
     "prettier/prettier": [1],
+    "import/order": [
+      1,
+      {
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": false
+        }
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": [0],
+    "@typescript-eslint/no-var-requires": [0],
     "@typescript-eslint/indent": [0],
-    "@typescript-eslint/no-unused-vars": [2, {"argsIgnorePattern": "^_" }]
-  }
+    "@typescript-eslint/no-unused-vars": [
+      2,
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [0],
+        "@typescript-eslint/explicit-module-boundary-types": [0]
+      }
+    }
+  ]
 }

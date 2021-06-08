@@ -1,19 +1,11 @@
-import { abortify, Abortable, Abort } from "./abortify";
+import type { Abortable } from "./abortable";
+import { abortify } from "./abortify";
 
-const wait = (ms: number): Abortable<void> => (resolve, reject): Abort => {
-  const handle = setTimeout(resolve, ms);
+export const sleep = abortify(createAbortableSleep);
 
-  return (err): void => {
-    clearTimeout(handle);
-    reject(err);
+function createAbortableSleep(ms: number): Abortable<void> {
+  return (resolve) => {
+    const handle = setTimeout(resolve, ms);
+    return () => clearTimeout(handle);
   };
-};
-
-/**
- * Sleeps for the specified duration (in milliseconds).
- *
- * @param {number} ms - The number of milliseconds.
- * @param {import("./cancellation-token").CancellationToken} token - The cancellation token.
- * @returns {Promise<void>}
- */
-export const sleep = abortify(wait);
+}

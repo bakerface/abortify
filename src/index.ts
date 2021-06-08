@@ -1,4 +1,4 @@
+export * from "./abort-error";
+export * from "./abortable";
 export * from "./abortify";
-export * from "./cancellation-token-source";
-export * from "./cancellation-token";
 export * from "./sleep";
