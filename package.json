@@ -8,6 +8,9 @@
   "author": "Chris Baker <mail.chris.baker@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/bakerface/abortify#readme",
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "abort",
     "async",
